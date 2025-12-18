@@ -10,11 +10,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
         :root { --base: #F5F2ED; --accent: #8C7355; --text: #4A443F; }
-        body { background-color: var(--base); color: var(--text); font-family: -apple-system, "Noto Sans TC", sans-serif; }
-        .spot-card { background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(140, 115, 85, 0.05); border-left: 5px solid var(--accent); transition: 0.2s; }
-        .spot-card:active { transform: scale(0.98); }
-        .floating-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 450px; background: rgba(255,255,255,0.9); backdrop-filter: blur(15px); border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; border: 1px solid rgba(255,255,255,0.3); }
-        .date-btn.active { background: var(--accent); color: white; box-shadow: 0 4px 12px rgba(140, 115, 85, 0.3); }
+        body { background-color: var(--base); color: var(--text); font-family: -apple-system, sans-serif; }
+        .spot-card { background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(140, 115, 85, 0.05); border-left: 5px solid var(--accent); }
+        .floating-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 450px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 100; }
+        .date-btn.active { background: var(--accent); color: white; transform: scale(1.05); }
         .tag-pill { font-size: 10px; padding: 2px 8px; border-radius: 6px; background: #f0ede9; color: #8C7355; font-weight: bold; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
@@ -24,11 +23,11 @@
     <header class="pt-8 px-6 mb-4 flex justify-between items-end">
         <div>
             <h1 class="text-3xl font-black text-[#8C7355] tracking-tight italic">NAGOYA</h1>
-            <p class="text-[10px] tracking-[0.2em] text-gray-400 font-bold uppercase">JX838 ✈️ JX839 | 2025 Winter</p>
+            <p class="text-[10px] tracking-[0.2em] text-gray-400 font-bold uppercase">JX838 ✈️ JX839 | Winter Trip</p>
         </div>
-        <div id="quick-temp" class="text-right">
-            <p class="text-2xl font-light" id="current-temp">--°C</p>
-            <p class="text-[10px] text-gray-400">Loading Weather...</p>
+        <div class="text-right">
+            <p class="text-2xl font-light">6°C</p>
+            <p class="text-[10px] text-gray-400">Nagoya, JP</p>
         </div>
     </header>
 
@@ -39,167 +38,110 @@
     </div>
 
     <div class="flex overflow-x-auto px-6 space-x-3 mb-6 no-scrollbar" id="date-tabs"></div>
-
     <main id="app-content" class="px-6 space-y-5"></main>
 
     <nav class="floating-nav px-8 py-4 flex justify-between items-center text-gray-400">
         <i class="fas fa-calendar-day text-[#8C7355] text-xl"></i>
-        <i class="fas fa-map-marked-alt text-xl hover:text-[#8C7355]" onclick="alert('地圖同步中')"></i>
-        <i class="fas fa-plus-circle text-3xl text-[#8C7355]" onclick="alert('管理員編輯功能：請先配置 Firebase')"></i>
+        <i class="fas fa-map-marked-alt text-xl"></i>
+        <i class="fas fa-plus-circle text-3xl text-[#8C7355]" onclick="alert('Firebase 未設定，目前為唯讀模式')"></i>
         <i class="fas fa-utensils text-xl"></i>
         <i class="fas fa-cog text-xl"></i>
     </nav>
 
     <script>
-        // 1. Firebase 配置 (請在此填入你的 Key)
-        const firebaseConfig = {
-            apiKey: "你的_API_KEY",
-            authDomain: "你的_ID.firebaseapp.com",
-            databaseURL: "https://你的_ID.firebaseio.com",
-            projectId: "你的_ID",
-            appId: "你的_APP_ID"
+        // 1. Firebase 配置 (選填)
+        const firebaseConfig = { apiKey: "NONE", projectId: "NONE" }; // 預設空值
+        
+        // 2. 靜態行程資料 (當連不上 Firebase 時使用)
+        const localData = {
+            "1221": { title: "Day 1：抵達名古屋", loc: "Nagoya", spots: [
+                { time: "14:55", type: "交通", name: "桃園機場 (JX838)", desc: "星宇航空出發", tags: ["✈️ 出發"] },
+                { time: "18:30", type: "交通", name: "中部國際機場", desc: "搭乘名鐵 μ-SKY", tags: ["μ-SKY"] },
+                { time: "20:00", type: "酒店", name: "名古屋新幹線口大和ROYNET酒店", desc: "入住休息", tags: ["住宿"] },
+                { time: "20:15", type: "食物", name: "金鯱橫丁", desc: "晚餐：味噌豬排、鰻魚飯", tags: ["必吃"] }
+            ]},
+            "1222": { title: "Day 2：犬山城 + 市區", loc: "Inuyama", spots: [
+                { time: "08:30", type: "景點", name: "犬山城下町", desc: "老街咖啡甜點", tags: ["拍照"] },
+                { time: "10:15", type: "景點", name: "犬山城天守閣", desc: "登上國寶天守", tags: ["必看"] },
+                { time: "13:30", type: "購物", name: "大須商店街", desc: "名古屋的廚房與觀音參拜", tags: ["必買"] },
+                { time: "15:15", type: "景點", name: "Oasis 21", desc: "地標拍照，看電視塔", tags: ["拍照"] }
+            ]},
+            "1223": { title: "Day 3：高山巡禮", loc: "Takayama", spots: [
+                { time: "07:45", type: "交通", name: "名古屋巴士總站", desc: "搭乘濃飛巴士 ($3,100)", tags: ["需預約"] },
+                { time: "11:00", type: "景點", name: "高山陣屋", desc: "江戶時代官方建築", tags: ["歷史"] },
+                { time: "13:00", type: "景點", name: "上三之町", desc: "高山老街散策，吃飛驒牛", tags: ["必拍"] },
+                { time: "18:00", type: "食物", name: "丸明 飛驒牛", desc: "晚餐：頂級燒肉", tags: ["必吃"] }
+            ]},
+            "1224": { title: "Day 4：合掌村", loc: "Shirakawa-go", spots: [
+                { time: "07:20", type: "交通", name: "高山濃飛巴士", desc: "前往白川鄉合掌村", tags: ["交通"] },
+                { time: "09:00", type: "景點", name: "城山展望台", desc: "合掌村全景拍攝點", tags: ["必拍"] },
+                { time: "14:30", type: "交通", name: "白川鄉巴士站", desc: "返抵名古屋站 (17:16)", tags: ["交通"] }
+            ]},
+            "1225": { title: "Day 5：吉卜力公園", loc: "Ghibli Park", spots: [
+                { time: "08:30", type: "交通", name: "愛・地球博記念公園", desc: "地鐵東山線轉 Linimo", tags: ["交通"] },
+                { time: "10:00", type: "活動", name: "動動力森林", desc: "入園首站探索", tags: ["預約"] },
+                { time: "14:00", type: "活動", name: "吉卜力大倉庫", desc: "經典場景集合", tags: ["必看"] }
+            ]},
+            "1226": { title: "Day 6：最終採購", loc: "Nagoya", spots: [
+                { time: "09:00", type: "景點", name: "熱田神宮", desc: "神宮參拜拍照", tags: ["必拍"] },
+                { time: "10:45", type: "景點", name: "名古屋城", desc: "參觀本丸御殿", tags: ["金鯱"] },
+                { time: "15:30", type: "交通", name: "名鐵名古屋站", desc: "搭 μ-SKY 前往機場", tags: ["交通"] },
+                { time: "19:40", type: "交通", name: "中部機場 (JX839)", desc: "星宇航空返台", tags: ["✈️ 歸途"] }
+            ]}
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        let currentDayKey = "1221";
+        let currentDay = "1221";
 
-        // 2. 完整 12/21 - 12/26 行程資料
-        const fullItinerary = {
-            "1221": {
-                title: "Day 1：抵達名古屋",
-                loc: "Nagoya City",
-                spots: [
-                    { time: "14:55", type: "交通", name: "桃園機場 (JX838)", desc: "星宇航空起飛，期待冬日之旅", tags: ["✈️ 出發"] },
-                    { time: "18:30", type: "交通", name: "中部國際機場", desc: "抵達後購買名鐵 μ-SKY 車票", tags: ["名古屋"] },
-                    { time: "19:30", type: "交通", name: "名古屋站", desc: "搭乘 μ-SKY 約 30 分鐘抵達", tags: ["μ-SKY"] },
-                    { time: "20:00", type: "酒店", name: "名古屋新幹線口大和ROYNET酒店", desc: "Check-in 寄放行李", tags: ["休息"] },
-                    { time: "20:30", type: "食物", name: "金鯱橫丁", desc: "晚餐：味噌豬排、鰻魚飯", tags: ["必吃"] },
-                    { time: "21:30", type: "景點", name: "JR塔展望台", desc: "欣賞名古屋車站高空夜景", tags: ["必拍"] }
-                ]
-            },
-            "1222": {
-                title: "Day 2：國寶犬山城",
-                loc: "Inuyama & Sakae",
-                spots: [
-                    { time: "08:30", type: "景點", name: "犬山城下町", desc: "老街散步吃咖啡、甜點小吃", tags: ["拍照"] },
-                    { time: "09:30", type: "景點", name: "三光稻荷神社", desc: "洗錢、拍紅色鳥居", tags: ["必拍"] },
-                    { time: "10:15", type: "景點", name: "犬山城天守閣", desc: "登上現存最古老天守眺望", tags: ["國寶"] },
-                    { time: "13:30", type: "購物", name: "大須商店街", desc: "大須觀音參拜與商店街美食", tags: ["必買"] },
-                    { time: "15:15", type: "景點", name: "Oasis 21", desc: "榮區地標：水之宇宙船、電視塔", tags: ["必拍"] },
-                    { time: "17:30", type: "食物", name: "世界的山將", desc: "晚餐：夢幻手羽先唐揚", tags: ["必吃"] }
-                ]
-            },
-            "1223": {
-                title: "Day 3：高山古街",
-                loc: "Takayama City",
-                spots: [
-                    { time: "07:45", type: "交通", name: "名古屋巴士總站", desc: "搭乘巴士前往高山 ($3,100)", tags: ["需預約"] },
-                    { time: "10:30", type: "酒店", name: "eph TAKAYAMA", desc: "寄存行李，準備逛早市", tags: ["住宿"] },
-                    { time: "11:00", type: "景點", name: "高山陣屋", desc: "江戶時代唯一留存的官署", tags: ["歷史"] },
-                    { time: "13:00", type: "景點", name: "上三之町", desc: "高山老街散策，品嚐飛驒牛", tags: ["必拍"] },
-                    { time: "18:00", type: "食物", name: "丸明 飛驒牛", desc: "晚餐：頂級飛驒牛燒肉/壽喜燒", tags: ["必吃"] }
-                ]
-            },
-            "1224": {
-                title: "Day 4：白川鄉童話村",
-                loc: "Shirakawa-go",
-                spots: [
-                    { time: "07:20", type: "交通", name: "高山濃飛巴士站", desc: "前往白川鄉合掌村", tags: ["08:10抵達"] },
-                    { time: "09:00", type: "景點", name: "城山展望台", desc: "俯瞰完整合掌屋村落全景", tags: ["必拍"] },
-                    { time: "11:00", type: "景點", name: "合掌造民家園", desc: "和田家、長瀨家內部參觀", tags: ["歷史"] },
-                    { time: "14:30", type: "交通", name: "白川鄉巴士站", desc: "出發返回名古屋站", tags: ["17:16抵達"] },
-                    { time: "17:30", type: "酒店", name: "大和ROYNET酒店", desc: "回到名古屋飯店休息", tags: ["住宿"] }
-                ]
-            },
-            "1225": {
-                title: "Day 5：吉卜力全日",
-                loc: "Ghibli Park",
-                spots: [
-                    { time: "08:30", type: "交通", name: "愛・地球博記念公園", desc: "地鐵東山線至藤之丘轉 Linimo", tags: ["交通"] },
-                    { time: "10:00", type: "活動", name: "動動力森林", desc: "入園首站，尋找龍貓身影", tags: ["必拍"] },
-                    { time: "12:00", type: "活動", name: "魔女之谷", desc: "霍爾的移動城堡、琪琪麵包店", tags: ["吉卜力"] },
-                    { time: "14:00", type: "活動", name: "吉卜力大倉庫", desc: "（依預約時間進場）所有經典集合", tags: ["重點"] },
-                    { time: "18:00", type: "購物", name: "名古屋車站", desc: "最後購物與晚餐安排", tags: ["購物"] }
-                ]
-            },
-            "1226": {
-                title: "Day 6：最後採購 & 歸途",
-                loc: "Nagoya & Airport",
-                spots: [
-                    { time: "09:00", type: "景點", name: "熱田神宮", desc: "日本三大神宮，放慢步調參拜", tags: ["必拍"] },
-                    { time: "10:45", type: "景點", name: "名古屋城", desc: "參觀本丸御殿之奢華金箔畫", tags: ["金鯱"] },
-                    { time: "13:30", type: "購物", name: "榮區百貨", desc: "最後伴手禮採買 (Parco/Lachic)", tags: ["購物"] },
-                    { time: "16:00", type: "交通", name: "名鐵名古屋站", desc: "搭乘 μ-SKY 前往機場", tags: ["μ-SKY"] },
-                    { time: "19:40", type: "交通", name: "中部國際機場 (JX839)", desc: "星宇航空起飛返台", tags: ["✈️ 歸途"] }
-                ]
-            }
-        };
-
-        // 3. 渲染與邏輯
-        db.ref('itinerary').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (!data) {
-                db.ref('itinerary').set(fullItinerary); // 初始同步
-                return;
-            }
-            renderTabs(data);
-            renderContent(data[currentDayKey]);
-        });
-
-        function renderTabs(data) {
+        function renderTabs() {
             const container = document.getElementById('date-tabs');
-            container.innerHTML = Object.keys(data).sort().map(day => `
+            container.innerHTML = Object.keys(localData).sort().map(day => `
                 <button onclick="switchDay('${day}')" id="btn-${day}" 
-                    class="date-btn flex-shrink-0 px-6 py-2.5 rounded-full bg-white shadow-sm text-sm font-bold transition-all ${currentDayKey === day ? 'active' : ''}">
+                    class="date-btn flex-shrink-0 px-6 py-2.5 rounded-full bg-white shadow-sm text-sm font-bold transition-all ${currentDay === day ? 'active' : ''}">
                     ${day.slice(0,2)}/${day.slice(2)}
                 </button>
             `).join('');
         }
 
         function switchDay(day) {
-            currentDayKey = day;
-            db.ref('itinerary').once('value', s => renderContent(s.val()[day]));
+            currentDay = day;
+            renderContent(localData[day]);
             document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`btn-${day}`).classList.add('active');
         }
 
         function renderContent(dayData) {
             const container = document.getElementById('app-content');
-            const firstSpot = dayData.spots[0].name;
-            document.getElementById('map-frame').src = `https://maps.google.com/maps?q=${encodeURIComponent(firstSpot)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+            document.getElementById('map-frame').src = `https://maps.google.com/maps?q=${encodeURIComponent(dayData.spots[0].name)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
 
-            container.innerHTML = `
-                <div class="mb-2">
-                    <h2 class="text-xl font-bold text-gray-800">${dayData.title}</h2>
-                    <p class="text-xs text-[#8C7355] font-medium"><i class="fas fa-location-arrow mr-1"></i> ${dayData.loc}</p>
-                </div>
-            `;
-            
+            container.innerHTML = `<h2 class="text-xl font-bold mb-1">${dayData.title}</h2><p class="text-xs text-[#8C7355] mb-4">📍 ${dayData.loc}</p>`;
             container.innerHTML += dayData.spots.map(spot => `
-                <div class="spot-card p-5" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name)}')">
+                <div class="spot-card p-5 mb-4" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name)}')">
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
-                            <span class="text-[9px] bg-stone-100 text-[#8C7355] px-2 py-0.5 rounded font-bold uppercase tracking-wider">${spot.type}</span>
+                            <span class="text-[9px] bg-stone-100 text-[#8C7355] px-2 py-0.5 rounded font-bold uppercase">${spot.type}</span>
                             <h3 class="text-base font-bold text-gray-800 mt-1">${spot.name}</h3>
-                            <p class="text-[12px] text-gray-500 mt-1 leading-snug">${spot.desc}</p>
+                            <p class="text-[12px] text-gray-500 mt-1">${spot.desc}</p>
                         </div>
-                        <div class="text-right ml-4">
-                            <span class="text-sm font-black text-[#8C7355] font-mono">${spot.time}</span>
-                        </div>
+                        <span class="text-sm font-black text-[#8C7355] font-mono ml-4">${spot.time}</span>
                     </div>
-                    <div class="mt-3 flex flex-wrap gap-1">
-                        ${spot.tags.map(t => `<span class="tag-pill">#${t}</span>`).join('')}
-                    </div>
+                    <div class="mt-3 flex gap-1">${spot.tags.map(t => `<span class="tag-pill">#${t}</span>`).join('')}</div>
                 </div>
             `).join('');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // 模擬即時氣溫（名古屋）
-        setTimeout(() => {
-            document.getElementById('current-temp').innerText = "6°C";
-            document.querySelector('#quick-temp p:last-child').innerText = "Clear / Nagoya";
-        }, 1000);
+        // 初始化
+        renderTabs();
+        renderContent(localData[currentDay]);
+
+        // 嘗試初始化 Firebase (若失敗則維持本地模式)
+        try {
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.database();
+            db.ref('itinerary').on('value', (s) => {
+                if(s.val()) { /* 如果雲端有資料則覆蓋本地 */ }
+            });
+        } catch(e) { console.log("Running in Local Mode"); }
     </script>
 </body>
 </html>
