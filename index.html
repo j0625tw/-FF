@@ -6,14 +6,13 @@
     <title>哪夠呀・NAGOYA 2025</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
         :root { --base: #F5F2ED; --accent: #8C7355; --text: #4A443F; }
-        body { background-color: var(--base); color: var(--text); font-family: -apple-system, sans-serif; }
-        .spot-card { background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(140, 115, 85, 0.05); border-left: 5px solid var(--accent); }
-        .floating-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 450px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 100; }
-        .date-btn.active { background: var(--accent); color: white; transform: scale(1.05); }
+        body { background-color: var(--base); color: var(--text); font-family: -apple-system, "Noto Sans TC", sans-serif; -webkit-font-smoothing: antialiased; }
+        .spot-card { background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(140, 115, 85, 0.05); border-left: 5px solid var(--accent); margin-bottom: 16px; }
+        .floating-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 450px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 100; border: 1px solid rgba(255,255,255,0.3); }
+        .date-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .date-btn.active { background: var(--accent); color: white; transform: scale(1.1); box-shadow: 0 4px 12px rgba(140, 115, 85, 0.3); }
         .tag-pill { font-size: 10px; padding: 2px 8px; border-radius: 6px; background: #f0ede9; color: #8C7355; font-weight: bold; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
@@ -38,55 +37,57 @@
     </div>
 
     <div class="flex overflow-x-auto px-6 space-x-3 mb-6 no-scrollbar" id="date-tabs"></div>
-    <main id="app-content" class="px-6 space-y-5"></main>
+
+    <main id="app-content" class="px-6"></main>
 
     <nav class="floating-nav px-8 py-4 flex justify-between items-center text-gray-400">
         <i class="fas fa-calendar-day text-[#8C7355] text-xl"></i>
         <i class="fas fa-map-marked-alt text-xl"></i>
-        <i class="fas fa-plus-circle text-3xl text-[#8C7355]" onclick="alert('Firebase 未設定，目前為唯讀模式')"></i>
         <i class="fas fa-utensils text-xl"></i>
-        <i class="fas fa-cog text-xl"></i>
+        <i class="fas fa-camera-retro text-xl"></i>
     </nav>
 
     <script>
-        // 1. Firebase 配置 (選填)
-        const firebaseConfig = { apiKey: "NONE", projectId: "NONE" }; // 預設空值
-        
-        // 2. 靜態行程資料 (當連不上 Firebase 時使用)
-        const localData = {
+        const itinerary = {
             "1221": { title: "Day 1：抵達名古屋", loc: "Nagoya", spots: [
-                { time: "14:55", type: "交通", name: "桃園機場 (JX838)", desc: "星宇航空出發", tags: ["✈️ 出發"] },
-                { time: "18:30", type: "交通", name: "中部國際機場", desc: "搭乘名鐵 μ-SKY", tags: ["μ-SKY"] },
-                { time: "20:00", type: "酒店", name: "名古屋新幹線口大和ROYNET酒店", desc: "入住休息", tags: ["住宿"] },
-                { time: "20:15", type: "食物", name: "金鯱橫丁", desc: "晚餐：味噌豬排、鰻魚飯", tags: ["必吃"] }
+                { time: "14:55", type: "交通", name: "桃園機場 (JX838)", desc: "星宇航空準時起飛", tags: ["出發"] },
+                { time: "18:30", type: "交通", name: "中部國際機場", desc: "搭乘名鐵 μ-SKY 前往名古屋站", tags: ["μ-SKY"] },
+                { time: "20:00", type: "酒店", name: "名古屋新幹線口大和ROYNET酒店", desc: "入住 Check-in", tags: ["住宿"] },
+                { time: "20:15", type: "食物", name: "金鯱橫丁", desc: "晚餐：味噌豬排、鰻魚飯", tags: ["必吃"] },
+                { time: "21:30", type: "景點", name: "JR塔展望台", desc: "若體力足夠可看夜景", tags: ["夜景"] }
             ]},
-            "1222": { title: "Day 2：犬山城 + 市區", loc: "Inuyama", spots: [
-                { time: "08:30", type: "景點", name: "犬山城下町", desc: "老街咖啡甜點", tags: ["拍照"] },
-                { time: "10:15", type: "景點", name: "犬山城天守閣", desc: "登上國寶天守", tags: ["必看"] },
-                { time: "13:30", type: "購物", name: "大須商店街", desc: "名古屋的廚房與觀音參拜", tags: ["必買"] },
-                { time: "15:15", type: "景點", name: "Oasis 21", desc: "地標拍照，看電視塔", tags: ["拍照"] }
+            "1222": { title: "Day 2：犬山城巡禮", loc: "Inuyama", spots: [
+                { time: "08:00", type: "交通", name: "名古屋站", desc: "出發前往犬山遊園站", tags: ["交通"] },
+                { time: "08:30", type: "景點", name: "犬山城下町", desc: "老街散策、咖啡甜點", tags: ["拍照"] },
+                { time: "09:30", type: "景點", name: "三光稻荷神社", desc: "洗錢祈福、拍照鳥居", tags: ["必拍"] },
+                { time: "10:15", type: "景點", name: "犬山城天守閣", desc: "登上國寶天守眺望全景", tags: ["國寶"] },
+                { time: "13:30", type: "購物", name: "大須商店街", desc: "大須觀音與美食街巡禮", tags: ["必逛"] },
+                { time: "15:15", type: "景點", name: "Oasis 21", desc: "榮區地標：水之宇宙船", tags: ["必拍"] }
             ]},
-            "1223": { title: "Day 3：高山巡禮", loc: "Takayama", spots: [
-                { time: "07:45", type: "交通", name: "名古屋巴士總站", desc: "搭乘濃飛巴士 ($3,100)", tags: ["需預約"] },
-                { time: "11:00", type: "景點", name: "高山陣屋", desc: "江戶時代官方建築", tags: ["歷史"] },
-                { time: "13:00", type: "景點", name: "上三之町", desc: "高山老街散策，吃飛驒牛", tags: ["必拍"] },
-                { time: "18:00", type: "食物", name: "丸明 飛驒牛", desc: "晚餐：頂級燒肉", tags: ["必吃"] }
+            "1223": { title: "Day 3：高山古街", loc: "Takayama", spots: [
+                { time: "07:45", type: "交通", name: "名古屋巴士總站", desc: "濃飛巴士前往高山 ($3,100)", tags: ["預約"] },
+                { time: "10:30", type: "酒店", name: "eph TAKAYAMA", desc: "寄存行李", tags: ["住宿"] },
+                { time: "11:00", type: "景點", name: "高山陣屋", desc: "江戶官署遺跡", tags: ["歷史"] },
+                { time: "13:00", type: "景點", name: "上三之町", desc: "古街老店、飛驒牛壽司", tags: ["必吃"] },
+                { time: "18:00", type: "食物", name: "丸明 飛驒牛", desc: "晚餐：高品質飛驒牛料理", tags: ["必吃"] }
             ]},
-            "1224": { title: "Day 4：合掌村", loc: "Shirakawa-go", spots: [
-                { time: "07:20", type: "交通", name: "高山濃飛巴士", desc: "前往白川鄉合掌村", tags: ["交通"] },
+            "1224": { title: "Day 4：白川鄉", loc: "Shirakawa-go", spots: [
+                { time: "07:20", type: "交通", name: "高山濃飛巴士站", desc: "出發前往合掌村", tags: ["交通"] },
                 { time: "09:00", type: "景點", name: "城山展望台", desc: "合掌村全景拍攝點", tags: ["必拍"] },
-                { time: "14:30", type: "交通", name: "白川鄉巴士站", desc: "返抵名古屋站 (17:16)", tags: ["交通"] }
+                { time: "11:30", type: "景點", name: "合掌村內遊覽", desc: "和田家參觀、村內散步", tags: ["散步"] },
+                { time: "14:30", type: "交通", name: "白川鄉巴士站", desc: "返回名古屋站 (17:16抵達)", tags: ["交通"] }
             ]},
-            "1225": { title: "Day 5：吉卜力公園", loc: "Ghibli Park", spots: [
-                { time: "08:30", type: "交通", name: "愛・地球博記念公園", desc: "地鐵東山線轉 Linimo", tags: ["交通"] },
-                { time: "10:00", type: "活動", name: "動動力森林", desc: "入園首站探索", tags: ["預約"] },
-                { time: "14:00", type: "活動", name: "吉卜力大倉庫", desc: "經典場景集合", tags: ["必看"] }
+            "1225": { title: "Day 5：吉卜力全日", loc: "Ghibli Park", spots: [
+                { time: "08:00", type: "交通", name: "愛・地球博記念公園", desc: "搭東山線至藤之丘轉 Linimo", tags: ["交通"] },
+                { time: "10:00", type: "活動", name: "動動力森林", desc: "吉卜力入園探索", tags: ["預約"] },
+                { time: "14:00", type: "活動", name: "吉卜力大倉庫", desc: "依預約時間進場參觀", tags: ["必看"] },
+                { time: "18:00", type: "購物", name: "名古屋市區", desc: "晚餐與自由購物行程", tags: ["自由"] }
             ]},
             "1226": { title: "Day 6：最終採購", loc: "Nagoya", spots: [
                 { time: "09:00", type: "景點", name: "熱田神宮", desc: "神宮參拜拍照", tags: ["必拍"] },
-                { time: "10:45", type: "景點", name: "名古屋城", desc: "參觀本丸御殿", tags: ["金鯱"] },
+                { time: "10:45", type: "景點", name: "名古屋城", desc: "參觀本丸御殿", tags: ["景點"] },
                 { time: "15:30", type: "交通", name: "名鐵名古屋站", desc: "搭 μ-SKY 前往機場", tags: ["交通"] },
-                { time: "19:40", type: "交通", name: "中部機場 (JX839)", desc: "星宇航空返台", tags: ["✈️ 歸途"] }
+                { time: "19:40", type: "交通", name: "中部機場 (JX839)", desc: "星宇航空起飛返台", tags: ["✈️ 歸途"] }
             ]}
         };
 
@@ -94,9 +95,9 @@
 
         function renderTabs() {
             const container = document.getElementById('date-tabs');
-            container.innerHTML = Object.keys(localData).sort().map(day => `
+            container.innerHTML = Object.keys(itinerary).sort().map(day => `
                 <button onclick="switchDay('${day}')" id="btn-${day}" 
-                    class="date-btn flex-shrink-0 px-6 py-2.5 rounded-full bg-white shadow-sm text-sm font-bold transition-all ${currentDay === day ? 'active' : ''}">
+                    class="date-btn flex-shrink-0 px-6 py-2.5 rounded-full bg-white shadow-sm text-sm font-bold ${currentDay === day ? 'active' : ''}">
                     ${day.slice(0,2)}/${day.slice(2)}
                 </button>
             `).join('');
@@ -104,7 +105,7 @@
 
         function switchDay(day) {
             currentDay = day;
-            renderContent(localData[day]);
+            renderContent(itinerary[day]);
             document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`btn-${day}`).classList.add('active');
         }
@@ -113,35 +114,34 @@
             const container = document.getElementById('app-content');
             document.getElementById('map-frame').src = `https://maps.google.com/maps?q=${encodeURIComponent(dayData.spots[0].name)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
 
-            container.innerHTML = `<h2 class="text-xl font-bold mb-1">${dayData.title}</h2><p class="text-xs text-[#8C7355] mb-4">📍 ${dayData.loc}</p>`;
-            container.innerHTML += dayData.spots.map(spot => `
-                <div class="spot-card p-5 mb-4" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name)}')">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <span class="text-[9px] bg-stone-100 text-[#8C7355] px-2 py-0.5 rounded font-bold uppercase">${spot.type}</span>
-                            <h3 class="text-base font-bold text-gray-800 mt-1">${spot.name}</h3>
-                            <p class="text-[12px] text-gray-500 mt-1">${spot.desc}</p>
-                        </div>
-                        <span class="text-sm font-black text-[#8C7355] font-mono ml-4">${spot.time}</span>
-                    </div>
-                    <div class="mt-3 flex gap-1">${spot.tags.map(t => `<span class="tag-pill">#${t}</span>`).join('')}</div>
+            container.innerHTML = `
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold">${dayData.title}</h2>
+                    <p class="text-[10px] text-[#8C7355] font-bold tracking-widest mt-1">📍 ${dayData.loc} PREVIEW</p>
                 </div>
-            `).join('');
+                ${dayData.spots.map(spot => `
+                    <div class="spot-card p-5" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name)}')">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <span class="text-[9px] bg-stone-100 text-[#8C7355] px-2 py-0.5 rounded font-bold uppercase tracking-wider">${spot.type}</span>
+                                <h3 class="text-base font-bold text-gray-800 mt-1">${spot.name}</h3>
+                                <p class="text-[12px] text-gray-500 mt-1 leading-snug">${spot.desc}</p>
+                            </div>
+                            <div class="text-right ml-4">
+                                <span class="text-sm font-black text-[#8C7355] font-mono">${spot.time}</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex flex-wrap gap-1">
+                            ${spot.tags.map(t => `<span class="tag-pill">#${t}</span>`).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+            `;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // 初始化
         renderTabs();
-        renderContent(localData[currentDay]);
-
-        // 嘗試初始化 Firebase (若失敗則維持本地模式)
-        try {
-            firebase.initializeApp(firebaseConfig);
-            const db = firebase.database();
-            db.ref('itinerary').on('value', (s) => {
-                if(s.val()) { /* 如果雲端有資料則覆蓋本地 */ }
-            });
-        } catch(e) { console.log("Running in Local Mode"); }
+        renderContent(itinerary[currentDay]);
     </script>
 </body>
 </html>
