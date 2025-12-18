@@ -2,127 +2,174 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ching's 名古屋冬之旅</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>名古屋・冬の旅</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
-        .tab-active { border-bottom: 2px solid #4cc9f0; color: #4cc9f0; }
+        :root {
+            --base: #F5F2ED;
+            --accent: #8C7355;
+            --text: #4A443F;
+            --card: #FFFFFF;
+        }
+        body { 
+            background-color: var(--base); 
+            color: var(--text); 
+            font-family: 'Noto Sans JP', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* 日系極簡卡片陰影 */
+        .spot-card {
+            box-shadow: 0 4px 20px rgba(140, 115, 85, 0.08);
+            border: 1px solid rgba(140, 115, 85, 0.1);
+            transition: transform 0.2s;
+        }
+        .spot-card:active { transform: scale(0.98); }
+
+        /* 浮動導覽條 */
+        .floating-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .date-btn.active {
+            background-color: var(--accent);
+            color: white;
+            box-shadow: 0 4px 10px rgba(140, 115, 85, 0.3);
+        }
+
+        .tag {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
     </style>
 </head>
-<body class="min-h-screen pb-20">
-    <header class="p-6 text-center">
-        <h1 class="text-2xl font-bold tracking-widest uppercase">Nagoya Vibe '25</h1>
-        <p class="text-gray-400 text-sm mt-1">12/21 - 12/26 Winter Trip</p>
+<body class="pb-32">
+
+    <header class="pt-10 px-6 mb-6">
+        <h1 class="text-3xl font-light tracking-tighter text-[#8C7355]">NAGOYA <span class="font-bold text-gray-800">2025</span></h1>
+        <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest">Winter Itinerary / 名古屋冬の旅</p>
     </header>
 
-    <div class="mx-6 mb-6 p-4 glass flex justify-between items-center">
-        <div>
-            <p class="text-xs text-gray-400">Current Location: Nagoya</p>
-            <p class="text-xl font-semibold">6°C <span class="text-sm font-normal ml-2">晴朗</span></p>
+    <div class="flex overflow-x-auto space-x-4 px-6 mb-8 no-scrollbar">
+        <div class="flex-shrink-0 bg-white/60 rounded-2xl p-4 flex items-center space-x-3 border border-[#8C7355]/10">
+            <i class="fas fa-temperature-low text-[#8C7355]"></i>
+            <div>
+                <p class="text-[10px] text-gray-400">名古屋 Nagoya</p>
+                <p class="text-sm font-bold">6°C <span class="font-normal text-gray-500">晴れ</span></p>
+            </div>
         </div>
-        <i class="fas fa-sun text-yellow-400 text-3xl"></i>
+        <div class="flex-shrink-0 bg-white/60 rounded-2xl p-4 flex items-center space-x-3 border border-[#8C7355]/10">
+            <i class="fas fa-snowflake text-blue-300"></i>
+            <div>
+                <p class="text-[10px] text-gray-400">白川鄉 Shirakawa</p>
+                <p class="text-sm font-bold">-2°C <span class="font-normal text-gray-500">雪</span></p>
+            </div>
+        </div>
     </div>
 
-    <div class="flex overflow-x-auto px-6 space-x-6 mb-8 no-scrollbar text-sm font-medium">
-        <button onclick="showDay(1)" class="whitespace-nowrap pb-2 tab-active" id="btn1">12/21</button>
-        <button onclick="showDay(2)" class="whitespace-nowrap pb-2" id="btn2">12/22</button>
-        <button onclick="showDay(3)" class="whitespace-nowrap pb-2" id="btn3">12/23</button>
-        <button onclick="showDay(4)" class="whitespace-nowrap pb-2" id="btn4">12/24</button>
-        <button onclick="showDay(5)" class="whitespace-nowrap pb-2" id="btn5">12/25</button>
-        <button onclick="showDay(6)" class="whitespace-nowrap pb-2" id="btn6">12/26</button>
+    <div class="flex overflow-x-auto px-6 space-x-3 mb-8 no-scrollbar">
+        <button onclick="renderDay(1)" id="d1" class="date-btn flex-shrink-0 w-20 py-3 rounded-2xl bg-white text-sm transition-all active">12/21</button>
+        <button onclick="renderDay(2)" id="d2" class="date-btn flex-shrink-0 w-20 py-3 rounded-2xl bg-white text-sm transition-all">12/22</button>
+        <button onclick="renderDay(3)" id="d3" class="date-btn flex-shrink-0 w-20 py-3 rounded-2xl bg-white text-sm transition-all">12/23</button>
+        <button onclick="renderDay(4)" id="d4" class="date-btn flex-shrink-0 w-20 py-3 rounded-2xl bg-white text-sm transition-all">12/24</button>
+        <button onclick="renderDay(5)" id="d5" class="date-btn flex-shrink-0 w-20 py-3 rounded-2xl bg-white text-sm transition-all">12/25</button>
+        <button onclick="renderDay(6)" id="d6" class="date-btn flex-shrink-0 w-20 py-3 rounded-2xl bg-white text-sm transition-all">12/26</button>
     </div>
 
-    <div id="itinerary" class="px-6 space-y-4">
-        </div>
+    <main id="app-content" class="px-6 space-y-6">
+        </main>
+
+    <nav class="floating-nav px-8 py-4 flex justify-between items-center text-gray-400">
+        <i class="fas fa-calendar-alt text-[#8C7355] text-lg"></i>
+        <i class="fas fa-map-marked-alt text-lg hover:text-[#8C7355]" onclick="window.open('https://www.google.com/maps')"></i>
+        <i class="fas fa-camera-retro text-lg"></i>
+        <i class="fas fa-cog text-lg"></i>
+    </nav>
 
     <script>
-        const itineraryData = {
+        const data = {
             1: {
-                title: "抵達名古屋",
-                items: [
-                    { time: "18:30", loc: "中部國際機場", icon: "plane-arrival" },
-                    { time: "19:00", loc: "名鐵 μ-SKY", icon: "train" },
-                    { time: "20:00", loc: "名古屋新幹線口大和ROYNET酒店", icon: "hotel" },
-                    { time: "20:15", loc: "金鯱橫丁 (晚餐)", icon: "utensils" }
+                date: "12/21", loc: "名古屋市區",
+                spots: [
+                    { type: "交通", name: "中部國際機場", desc: "抵達日本，搭乘 μ-SKY 快速前往市中心。", tags: ["必拍"], color: "bg-blue-100 text-blue-600", time: "18:30" },
+                    { type: "酒店", name: "大和ROYNET酒店", desc: "新幹線口站前，位置極佳，放行李後出發。", tags: ["住宿"], color: "bg-stone-100 text-stone-600", time: "20:00" },
+                    { type: "食物", name: "金鯱橫丁", desc: "品嚐名古屋特有的赤味噌料理或鰻魚飯。", tags: ["必吃"], color: "bg-orange-100 text-orange-600", time: "20:30" }
                 ]
             },
             2: {
-                title: "犬山城 + 市區精華",
-                items: [
-                    { time: "08:30", loc: "犬山城下町", icon: "store" },
-                    { time: "10:15", loc: "犬山城天守閣", icon: "fort-awesome" },
-                    { time: "13:30", loc: "大須商店街", icon: "shopping-bag" },
-                    { time: "15:15", loc: "榮區 Oasis21", icon: "building" }
+                date: "12/22", loc: "犬山 & 榮區",
+                spots: [
+                    { type: "景點", name: "犬山城天守閣", desc: "現存最古老天守，俯瞰木曾川絕景。", tags: ["必拍", "歷史"], color: "bg-green-100 text-green-600", time: "10:00" },
+                    { type: "購物", name: "大須商店街", desc: "名古屋的秋葉原，古著與美食天堂。", tags: ["必買"], color: "bg-pink-100 text-pink-600", time: "14:00" }
                 ]
             },
-            3: {
-                title: "高山古街之旅",
-                items: [
-                    { time: "10:20", loc: "抵達高山站", icon: "bus" },
-                    { time: "11:00", loc: "高山陣屋", icon: "landmark" },
-                    { time: "13:00", loc: "上三之町老街", icon: "walking" },
-                    { time: "18:00", loc: "飛驒牛料理", icon: "drumstick-bite" }
-                ]
-            },
-            4: {
-                title: "白川鄉合掌村",
-                items: [
-                    { time: "08:10", loc: "白川鄉合掌村", icon: "home" },
-                    { time: "10:00", loc: "城山展望台", icon: "mountain" },
-                    { time: "17:30", loc: "回到名古屋飯店", icon: "hotel" }
-                ]
-            },
-            5: {
-                title: "吉卜力公園全日",
-                items: [
-                    { time: "10:00", loc: "吉卜力公園 (動動力森林)", icon: "leaf" },
-                    { time: "14:00", loc: "吉卜力大倉庫", icon: "archive" },
-                    { time: "18:00", loc: "榮區自由晚餐", icon: "utensils" }
-                ]
-            },
-            6: {
-                title: "深度採購 & 歸途",
-                items: [
-                    { time: "09:00", loc: "熱田神宮", icon: "shrine" },
-                    { time: "10:45", loc: "名古屋城", icon: "fort-awesome" },
-                    { time: "15:30", loc: "前往中部國際機場", icon: "plane-departure" }
-                ]
-            }
+            // ... 更多日期資料可在此擴充
         };
 
-        function showDay(day) {
-            const container = document.getElementById('itinerary');
-            const data = itineraryData[day];
-            
-            // Update Tab UI
-            document.querySelectorAll('button').forEach(b => b.classList.remove('tab-active'));
-            document.getElementById(`btn${day}`).classList.add('tab-active');
+        function renderDay(dayNum) {
+            // 更新按鈕樣式
+            document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('d' + dayNum).classList.add('active');
 
-            // Render Content
-            container.innerHTML = `<h2 class="text-xl font-bold mb-4">${data.title}</h2>`;
-            data.items.forEach(item => {
-                container.innerHTML += `
-                    <div class="glass p-4 flex items-center justify-between" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.loc)}')">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
-                                <i class="fas fa-${item.icon}"></i>
-                            </div>
+            const dayData = data[dayNum] || { date: "Checking...", loc: "旅程規劃中", spots: [] };
+            const container = document.getElementById('app-content');
+            
+            let html = `
+                <div class="mb-2">
+                    <span class="text-[#8C7355] font-bold text-xl">${dayData.date}</span>
+                    <span class="ml-2 text-gray-400">| ${dayData.loc}</span>
+                </div>
+            `;
+
+            if(dayData.spots.length === 0) {
+                html += `<p class="text-gray-400 mt-10 text-center">精彩行程準備中...</p>`;
+            }
+
+            dayData.spots.forEach(spot => {
+                const tagsHtml = spot.tags.map(t => `<span class="tag ${spot.color} mr-1">${t}</span>`).join('');
+                html += `
+                    <div class="spot-card bg-white rounded-3xl p-5 flex flex-col space-y-3">
+                        <div class="flex justify-between items-start">
                             <div>
-                                <p class="text-xs text-gray-400">${item.time}</p>
-                                <p class="font-medium">${item.loc}</p>
+                                <span class="text-[10px] tracking-widest text-[#8C7355] uppercase font-bold">${spot.type}</span>
+                                <h3 class="text-lg font-bold mt-1 text-gray-800">${spot.name}</h3>
                             </div>
+                            <span class="text-sm font-medium text-gray-300">${spot.time}</span>
                         </div>
-                        <i class="fas fa-chevron-right text-gray-600 text-sm"></i>
+                        <p class="text-sm text-gray-500 leading-relaxed">${spot.desc}</p>
+                        <div class="flex items-center justify-between pt-2">
+                            <div class="flex">${tagsHtml}</div>
+                            <button onclick="window.open('https://www.google.com/maps/search/${encodeURIComponent(spot.name)}')" 
+                                class="w-10 h-10 rounded-full bg-[#8C7355]/10 flex items-center justify-center text-[#8C7355]">
+                                <i class="fas fa-location-arrow text-sm"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
             });
+            
+            container.innerHTML = html;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Initial Load
-        showDay(1);
+        // 初始化
+        renderDay(1);
     </script>
 </body>
 </html>
