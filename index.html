@@ -9,11 +9,10 @@
     <style>
         :root { --base: #F5F2ED; --accent: #8C7355; --text: #4A443F; }
         body { background-color: var(--base); color: var(--text); font-family: -apple-system, sans-serif; }
-        .spot-card { background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(140, 115, 85, 0.05); border-left: 5px solid var(--accent); position: relative; }
+        .spot-card { background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(140, 115, 85, 0.05); border-left: 5px solid var(--accent); position: relative; transition: transform 0.1s; cursor: pointer; }
+        .spot-card:active { transform: scale(0.98); }
         .floating-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 450px; background: rgba(255,255,255,0.98); backdrop-filter: blur(10px); border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 100; }
         .date-btn.active { background: var(--accent); color: white; transform: scale(1.05); }
-        .edit-mode .delete-btn { display: block; }
-        .delete-btn { display: none; position: absolute; -top: 10px; -right: 10px; color: #ef4444; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         input, textarea { background: #f9f8f6; border: 1px solid #e2e0db; border-radius: 8px; padding: 4px 8px; width: 100%; }
     </style>
@@ -23,7 +22,7 @@
     <header class="pt-8 px-6 mb-4 flex justify-between items-end">
         <div>
             <h1 class="text-3xl font-black text-[#8C7355] italic">NAGOYA</h1>
-            <p class="text-[10px] tracking-widest text-gray-400 font-bold">WINTER 2025 · 行程管理器</p>
+            <p class="text-[10px] tracking-widest text-gray-400 font-bold">WINTER 2025 · 行程管理</p>
         </div>
         <button onclick="toggleEditMode()" id="edit-toggle" class="bg-stone-200 px-4 py-1 rounded-full text-xs font-bold">編輯模式: OFF</button>
     </header>
@@ -35,7 +34,6 @@
     </div>
 
     <div class="flex overflow-x-auto px-6 space-x-3 mb-6 no-scrollbar" id="date-tabs"></div>
-
     <main id="app-content" class="px-6 space-y-4"></main>
 
     <div id="add-modal" class="fixed inset-0 bg-black/50 z-[200] hidden flex items-center justify-center p-6">
@@ -51,62 +49,49 @@
         </div>
     </div>
 
-    <nav class="floating-nav px-8 py-4 flex justify-between items-center">
-        <div onclick="switchDay(currentDay)" class="text-[#8C7355] flex flex-col items-center"><i class="fas fa-home"></i><span class="text-[9px]">首頁</span></div>
+    <nav class="floating-nav px-8 py-4 flex justify-between items-center text-[#8C7355]">
+        <div onclick="window.scrollTo({top:0, behavior:'smooth'})" class="flex flex-col items-center"><i class="fas fa-home"></i><span class="text-[9px]">首頁</span></div>
         <div onclick="showAddModal()" class="bg-[#8C7355] text-white w-12 h-12 rounded-full flex items-center justify-center -mt-10 shadow-lg"><i class="fas fa-plus"></i></div>
-        <div onclick="exportData()" class="text-gray-400 flex flex-col items-center"><i class="fas fa-share-square"></i><span class="text-[9px]">導出</span></div>
+        <div onclick="exportData()" class="flex flex-col items-center opacity-40"><i class="fas fa-share-square"></i><span class="text-[9px]">導出</span></div>
     </nav>
 
     <script>
-        // 初始完整行程資料
         const defaultData = {
             "1221": { title: "Day 1：抵達名古屋", spots: [
-                { time: "14:55", name: "桃園機場 (星宇 JX838)", desc: "辦理登機，預計 18:30 抵達" },
-                { time: "19:00", name: "名鐵 μ-SKY", desc: "19:00–19:30 前往名古屋站" },
-                { time: "20:00", name: "大和ROYNET酒店", desc: "入住新幹線口分店" },
-                { time: "20:15", name: "晚餐：車站地下街", desc: "金鯱橫丁、味噌豬排、鰻魚飯" },
-                { time: "21:30", name: "JR塔展望台", desc: "若體力足夠欣賞夜景" }
+                { time: "14:55", name: "桃園機場", desc: "星宇 JX838 18:30 抵達" },
+                { time: "19:00", name: "名鐵 μ-SKY", desc: "前往名古屋站" },
+                { time: "20:00", name: "名古屋新幹線口大和ROYNET酒店", desc: "入住休息" },
+                { time: "20:15", name: "名古屋車站地下街", desc: "金鯱橫丁晚餐：味噌豬排、鰻魚飯" }
             ]},
-            "1222": { title: "Day 2：犬山與市區", spots: [
-                { time: "08:00", name: "名古屋站出發", desc: "搭名鐵前往犬山（約30分鐘）" },
-                { time: "08:30", name: "犬山城下町", desc: "老街逛街、小吃、咖啡甜點" },
-                { time: "09:30", name: "神社參拜", desc: "三光稻荷神社、針鋼神社散步" },
-                { time: "10:15", name: "犬山城天守閣", desc: "登頂眺望全景至11:30" },
-                { time: "13:30", name: "大須商店街", desc: "大須觀音、小吃採購" },
-                { time: "15:15", name: "榮區商圈", desc: "Oasis21、Parco、Lachic購物" },
-                { time: "17:30", name: "晚餐", name: "世界的山將 / 鰻魚飯", desc: "" }
+            "1222": { title: "Day 2：犬山城+市區", spots: [
+                { time: "08:30", name: "犬山城下町", desc: "逛街小吃、咖啡甜點" },
+                { time: "10:15", name: "犬山城天守閣", desc: "國寶天守參觀" },
+                { time: "13:30", name: "大須商店街", desc: "商店街巡禮與美食" },
+                { time: "15:15", name: "榮區 Oasis21", desc: "購物與地標拍照" }
             ]},
             "1223": { title: "Day 3：名古屋 → 高山", spots: [
-                { time: "07:45", name: "名古屋新幹線口巴士站", desc: "搭乘巴士出發 (10:20抵達)" },
-                { time: "10:30", name: "eph TAKAYAMA", desc: "寄存行李" },
-                { time: "11:00", name: "高山陣屋 / 早市", desc: "歷史建築與特色市集" },
-                { time: "13:00", name: "古街散策", desc: "上三之町、老街小店、飛驒牛小吃" },
-                { time: "18:00", name: "晚餐：飛驒牛料理", desc: "壽喜燒、握壽司、串燒" }
+                { time: "07:45", name: "名古屋新幹線巴士站", desc: "巴士前往高山" },
+                { time: "11:00", name: "高山陣屋", desc: "江戶官署參觀" },
+                { time: "13:00", name: "高山古街", desc: "上三之町散策、飛驒牛" }
             ]},
             "1224": { title: "Day 4：高山 → 白川鄉", spots: [
-                { time: "07:20", name: "高山濃飛巴士", desc: "出發前往白川鄉 (08:10抵達)" },
-                { time: "08:10", name: "白川鄉合掌村", desc: "和田家、民家園、老街散步" },
-                { time: "10:00", name: "城山展望台", desc: "拍攝村落全景" },
-                { time: "14:30", name: "白川鄉出發", desc: "搭巴士回名古屋 (17:16抵達)" },
-                { time: "17:30", name: "大和ROYNET酒店", desc: "辦理入住" }
+                { time: "07:20", name: "高山濃飛巴士", desc: "前往白川鄉" },
+                { time: "09:00", name: "白川鄉展望台", desc: "合掌村全景" },
+                { time: "14:30", name: "白川鄉巴士站", desc: "返抵名古屋" }
             ]},
-            "1225": { title: "Day 5：吉卜力全日 (包含接駁順序)", spots: [
-                { time: "08:00", name: "名古屋站出發", desc: "地鐵東山線至藤之丘 → 轉Linimo單軌" },
-                { time: "09:30", name: "愛・地球博公園", desc: "至園區E1站牌 (地球市民交流中心) 搭乘免費接駁巴士" },
-                { time: "10:00", name: "動動力森林區", desc: "等待開園，優先遊覽龍貓區" },
-                { time: "11:30", name: "魔女之谷 / 魔法之里", desc: "依序遊覽，包含青春之丘" },
-                { time: "14:00", name: "吉卜力大倉庫", desc: "依票券時間入場，停留至17:00" },
-                { time: "17:30", name: "回名古屋市區", desc: "自由安排晚餐與休息" }
+            "1225": { title: "Day 5：吉卜力公園", spots: [
+                { time: "08:00", name: "名古屋站", desc: "地鐵東山線至藤之丘 → 轉Linimo" },
+                { time: "09:30", name: "地球市民交流中心(E1站牌)", desc: "搭乘園區免費接駁巴士" },
+                { time: "10:00", name: "動動力森林", desc: "順序：動動力森林區 → 魔女之谷 → 魔法之里 → 青春之丘" },
+                { time: "14:00", name: "吉卜力大倉庫", desc: "依預約票券時間入場" }
             ]},
-            "1226": { title: "Day 6：名古屋城 / 歸途", spots: [
-                { time: "09:00", name: "熱田神宮", desc: "放慢步調參拜與拍照" },
-                { time: "10:45", name: "名古屋城", desc: "本丸御殿完整參觀" },
-                { time: "15:30", name: "μ-SKY 名古屋站", desc: "出發前往中部國際機場" },
-                { time: "19:40", name: "中部國際機場 (星宇 JX839)", desc: "22:15 抵達桃園" }
+            "1226": { title: "Day 6：最終採購", spots: [
+                { time: "09:00", name: "熱田神宮", desc: "參拜拍照" },
+                { time: "10:45", name: "名古屋城", desc: "本丸御殿參觀" },
+                { time: "19:40", name: "中部國際機場", desc: "星宇 JX839 返回桃園" }
             ]}
         };
 
-        // 從 LocalStorage 載入資料，若無則用預設
         let myTrip = JSON.parse(localStorage.getItem('nagoya_trip')) || defaultData;
         let currentDay = "1221";
         let isEditMode = false;
@@ -127,19 +112,19 @@
         function renderContent() {
             const container = document.getElementById('app-content');
             const data = myTrip[currentDay];
-            document.getElementById('map-frame').src = `https://maps.google.com/maps?q=${encodeURIComponent(data.spots[0]?.name || '名古屋站')}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+            document.getElementById('map-frame').src = `https://maps.google.com/maps?q=${encodeURIComponent(data.spots[0]?.name || '名古屋')}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
 
             container.innerHTML = `<h2 class="text-xl font-bold">${data.title}</h2>`;
             container.innerHTML += data.spots.map((spot, index) => `
-                <div class="spot-card p-5 ${isEditMode ? 'ring-2 ring-stone-200' : ''}">
-                    ${isEditMode ? `<button onclick="deleteSpot(${index})" class="text-red-500 absolute top-4 right-4"><i class="fas fa-times-circle"></i></button>` : ''}
+                <div class="spot-card p-5" onclick="${isEditMode ? '' : `window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name)}')`}">
+                    ${isEditMode ? `<button onclick="event.stopPropagation(); deleteSpot(${index})" class="text-red-500 absolute top-4 right-4"><i class="fas fa-times-circle"></i></button>` : ''}
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
-                            ${isEditMode ? `<input type="text" onchange="updateSpot(${index}, 'name', this.value)" value="${spot.name}" class="font-bold mb-1">` : `<h3 class="text-base font-bold text-gray-800">${spot.name}</h3>`}
-                            ${isEditMode ? `<textarea onchange="updateSpot(${index}, 'desc', this.value)" class="text-xs mt-1">${spot.desc}</textarea>` : `<p class="text-[12px] text-gray-500 mt-1">${spot.desc}</p>`}
+                            ${isEditMode ? `<input type="text" onchange="updateSpot(${index}, 'name', this.value)" value="${spot.name}" class="font-bold mb-1" onclick="event.stopPropagation()">` : `<h3 class="text-base font-bold text-gray-800">${spot.name}</h3>`}
+                            ${isEditMode ? `<textarea onchange="updateSpot(${index}, 'desc', this.value)" class="text-xs mt-1" onclick="event.stopPropagation()">${spot.desc}</textarea>` : `<p class="text-[12px] text-gray-500 mt-1">${spot.desc}</p>`}
                         </div>
                         <div class="text-right ml-4">
-                            ${isEditMode ? `<input type="text" onchange="updateSpot(${index}, 'time', this.value)" value="${spot.time}" class="text-sm font-black text-right">` : `<span class="text-sm font-black text-[#8C7355] font-mono">${spot.time}</span>`}
+                            ${isEditMode ? `<input type="text" onchange="updateSpot(${index}, 'time', this.value)" value="${spot.time}" class="text-sm font-black text-right" onclick="event.stopPropagation()">` : `<span class="text-sm font-black text-[#8C7355] font-mono">${spot.time}</span>`}
                         </div>
                     </div>
                 </div>
@@ -160,7 +145,7 @@
         }
 
         function deleteSpot(index) {
-            if(confirm('確定要刪除這個地點嗎？')) {
+            if(confirm('確定要刪除？')) {
                 myTrip[currentDay].spots.splice(index, 1);
                 saveData();
                 renderContent();
@@ -177,24 +162,17 @@
                 desc: document.getElementById('new-desc').value
             };
             myTrip[currentDay].spots.push(newSpot);
-            myTrip[currentDay].spots.sort((a,b) => a.time.localeCompare(b.time)); // 按時間排序
+            myTrip[currentDay].spots.sort((a,b) => a.time.localeCompare(b.time));
             saveData();
             renderContent();
             closeModal();
-            // 清空輸入框
             document.getElementById('new-time').value = '';
             document.getElementById('new-name').value = '';
             document.getElementById('new-desc').value = '';
         }
 
-        function saveData() {
-            localStorage.setItem('nagoya_trip', JSON.stringify(myTrip));
-        }
-
-        function exportData() {
-            const dataStr = JSON.stringify(myTrip);
-            prompt("複製以下代碼發送給朋友，他們貼上後即可同步行程 (開發中):", dataStr);
-        }
+        function saveData() { localStorage.setItem('nagoya_trip', JSON.stringify(myTrip)); }
+        function exportData() { prompt("行程代碼 (複製可用於同步):", JSON.stringify(myTrip)); }
 
         renderTabs();
         renderContent();
