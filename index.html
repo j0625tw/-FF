@@ -36,10 +36,10 @@
                     <span id="weather-temp" class="text-5xl font-light">--</span>
                     <span class="text-2xl ml-1">°C</span>
                 </div>
-                <p id="weather-desc" class="text-sm mt-1 font-medium italic">點擊看雨勢預報</p>
+                <p id="weather-desc" class="text-sm mt-1 font-medium italic underline cursor-pointer">點擊看詳細預報</p>
             </div>
             <div class="text-right z-10">
-                <i id="weather-icon" class="fas fa-cloud-showers-heavy text-6xl opacity-30"></i>
+                <i id="weather-icon" class="fas fa-snowflake text-6xl opacity-30"></i>
             </div>
         </div>
     </div>
@@ -79,41 +79,40 @@
             "1221": { title: "Day 1：抵達名古屋", city: "Nagoya", spots: [
                 { time: "14:55", name: "桃園機場", desc: "星宇 JX838 18:30 抵達" },
                 { time: "19:00", name: "名鐵 μ-SKY", desc: "中部機場 → 名古屋站" },
-                { time: "20:15", name: "名古屋車站地下街", desc: "晚餐：味噌豬排、鰻魚飯、金鯱橫丁" }
+                { time: "20:15", name: "名古屋車站", desc: "晚餐：名代味噌豬排或鰻魚飯" }
             ]},
             "1222": { title: "Day 2：犬山城與榮區購物", city: "Inuyama", spots: [
                 { time: "08:30", name: "名古屋站", desc: "搭乘名鐵前往「犬山遊園站」" },
-                { time: "09:30", name: "犬山城天守閣", desc: "登頂避人潮，眺望木曾川全景" },
-                { time: "11:00", name: "三光稻荷神社", desc: "拍照紅色鳥居" },
+                { time: "09:30", name: "犬山城天守閣", desc: "先登頂避開中午人潮" },
+                { time: "11:00", name: "三光稻荷神社", desc: "洗錢祈福、紅色鳥居拍照" },
                 { time: "12:00", name: "犬山城下町", desc: "午餐邊走邊吃，約14:00離開" },
-                { time: "15:00", name: "大須觀音(視體力)", desc: "走馬看花逛商店街，順向逛向榮區" },
-                { time: "17:00", name: "榮區商圈", desc: "Parco、Lachic、百貨逛街購物" },
-                { time: "19:00", name: "Oasis 21", desc: "點燈水之宇宙船與電視塔" }
+                { time: "15:00", name: "大須觀音(視體力)", desc: "走馬看花逛商店街" },
+                { time: "17:00", name: "榮區商圈", desc: "Parco、Lachic百貨逛街" },
+                { time: "19:00", name: "Oasis 21", desc: "看電視塔夜景與點燈" }
             ]},
-            "1223": { title: "Day 3：名古屋 → 高山", city: "Takayama", spots: [
-                { time: "07:45", name: "名古屋巴士總站", desc: "搭乘濃飛巴士前往高山" },
-                { time: "11:00", name: "高山陣屋 / 早市", desc: "歷史建築與市集" },
-                { time: "13:30", name: "上三之町老街", desc: "飛驒牛小吃、古街散策" },
-                { time: "18:00", name: "丸明 飛驒牛", desc: "晚餐燒肉盛宴" }
+            "1223": { title: "Day 3：高山精華一日遊", city: "Takayama", spots: [
+                { time: "07:45", name: "名古屋巴士總站", desc: "搭乘濃飛巴士出發" },
+                { time: "11:00", name: "抵達高山站", desc: "先至飯店放行李" },
+                { time: "11:30", name: "上三之町老街", desc: "午餐：飛驒牛握壽司、特色小吃" },
+                { time: "13:00", name: "中橋", desc: "高山經典紅色橋拍照點" },
+                { time: "14:00", name: "高山陣屋", desc: "全日唯一的郡代官府參觀" },
+                { time: "15:30", name: "飛驒之里", desc: "搭猿寶寶巴士參觀合掌屋建築" },
+                { time: "18:00", name: "飛驒牛燒肉", desc: "晚餐：丸明或味藏天國" }
             ]},
             "1224": { title: "Day 4：雨天撤離！名古屋室內行", city: "Nagoya", spots: [
-                { time: "08:00", name: "宮川早市/高山老街", desc: "最後快速巡禮補貨，準備撤離" },
-                { time: "10:00", name: "高山濃飛巴士站", desc: "搭乘巴士回名古屋(預計12:45抵達)" },
-                { time: "13:00", name: "名古屋站午餐", desc: "車站地下街快速解決" },
-                { time: "14:00", name: "豐田產業技術紀念館", desc: "【躲雨首選】展示極美，最後入場16:30" },
-                { time: "17:00", name: "則武之森 AEON", desc: "超美蔦屋書店巨型書牆，逛超市補貨" }
+                { time: "08:00", name: "宮川早市", desc: "最後快速巡禮補貨，10點準備離開" },
+                { time: "10:00", name: "高山濃飛巴士站", desc: "搭乘巴士回名古屋(12:45抵達)" },
+                { time: "13:00", name: "名古屋站午餐", desc: "車站地下街解決" },
+                { time: "14:00", name: "豐田產業技術紀念館", desc: "室內避雨，最後入場16:30" },
+                { time: "17:00", name: "則武之森 AEON", desc: "網美巨型書牆、超市採買" }
             ]},
             "1225": { title: "Day 5：吉卜力全日", city: "Nagakute", spots: [
-                { time: "08:30", name: "名古屋站出發", desc: "東山線至藤之丘轉 Linimo" },
-                { time: "09:30", name: "E1 接駁站牌", desc: "搭接駁巴士前往動動力森林" },
-                { time: "10:00", name: "動動力森林", desc: "核心展區參觀" },
-                { time: "14:00", name: "吉卜力大倉庫", desc: "下午主要活動區" }
+                { time: "09:30", name: "吉卜力公園", desc: "大倉庫、魔女之谷、全日遊覽" }
             ]},
             "1226": { title: "Day 6：最終補貨與歸途", city: "Nagoya", spots: [
                 { time: "09:00", name: "熱田神宮", desc: "悠閒參拜" },
-                { time: "11:00", name: "大須商店街 / 名古屋城", desc: "最後補貨採買" },
-                { time: "15:30", name: "名古屋站", desc: "搭 μ-SKY 前往機場" },
-                { time: "19:40", name: "中部機場 (JX839)", desc: "22:15 返抵桃園" }
+                { time: "11:00", name: "大須商店街", desc: "最後採買行程" },
+                { time: "15:30", name: "名古屋站", desc: "搭 μ-SKY 前往中部機場" }
             ]}
         };
 
@@ -148,8 +147,10 @@
             const container = document.getElementById('app-content');
             const data = myTrip[currentDay];
             container.innerHTML = `<h2 class="text-xl font-bold mb-2">${data.title}</h2>`;
-            container.innerHTML += data.spots.map((spot, index) => `
-                <div class="spot-card p-5" onclick="${isEditMode ? '' : `window.open('http://googleusercontent.com/maps.google.com/maps?q=${encodeURIComponent(spot.name)}')`}">
+            container.innerHTML += data.spots.map((spot, index) => {
+                const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name)}`;
+                return `
+                <div class="spot-card p-5" onclick="${isEditMode ? '' : `window.open('${mapLink}')`}">
                     ${isEditMode ? `<button onclick="event.stopPropagation(); deleteSpot(${index})" class="text-red-500 absolute top-4 right-4"><i class="fas fa-times-circle"></i></button>` : ''}
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
@@ -160,8 +161,8 @@
                             ${isEditMode ? `<input type="text" onchange="updateSpot(${index}, 'time', this.value)" value="${spot.time}" class="text-sm font-black text-right w-16" onclick="event.stopPropagation()">` : `<span class="text-sm font-black text-[#8C7355] font-mono">${spot.time}</span>`}
                         </div>
                     </div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         function toggleEditMode() {
