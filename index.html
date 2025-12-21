@@ -77,37 +77,41 @@
     <script>
         const defaultData = {
             "1221": { title: "Day 1：抵達名古屋", city: "Nagoya", spots: [
-                { time: "14:55", name: "桃園機場", desc: "星宇 JX838 18:30 抵達" },
-                { time: "19:00", name: "名鐵 μ-SKY", desc: "中部機場 → 名古屋站" },
-                { time: "20:15", name: "名古屋車站", desc: "晚餐：名代味噌豬排或鰻魚飯" }
+                { time: "18:30", name: "中部國際機場", desc: "抵達、出關，搭乘 μ-SKY 前往名站" },
+                { time: "20:30", name: "名古屋車站", desc: "飯店 Check-in，吃味噌豬排或鰻魚飯" }
             ]},
             "1222": { title: "Day 2：犬山城與榮區購物", city: "Inuyama", spots: [
                 { time: "08:30", name: "名古屋站", desc: "搭乘名鐵前往「犬山遊園站」" },
-                { time: "09:30", name: "犬山城天守閣", desc: "先登頂避開中午人潮" },
-                { time: "11:00", name: "三光稻荷神社", desc: "洗錢祈福、紅色鳥居拍照" },
-                { time: "12:00", name: "犬山城下町", desc: "午餐邊走邊吃，約14:00離開" },
-                { time: "15:00", name: "大須觀音(視體力)", desc: "走馬看花逛商店街" },
-                { time: "17:00", name: "榮區商圈", desc: "Parco、Lachic百貨逛街" },
-                { time: "19:00", name: "Oasis 21", desc: "看電視塔夜景與點燈" }
+                { time: "09:30", name: "犬山城天守閣", desc: "登頂避人潮" },
+                { time: "11:00", name: "三光稻荷神社", desc: "洗錢祈福" },
+                { time: "12:00", name: "犬山城下町", desc: "午餐邊走邊吃" },
+                { time: "15:00", name: "大須觀音", desc: "視體力走馬看花逛商店街" },
+                { time: "17:00", name: "榮區商圈", desc: "百貨逛街、購物行程" },
+                { time: "19:00", name: "Oasis 21", desc: "電視塔點燈夜景" }
             ]},
-            "1223": { title: "Day 3：高山精華一日遊", city: "Takayama", spots: [
+            "1223": { title: "Day 3：高山精華巡禮", city: "Takayama", spots: [
                 { time: "07:45", name: "名古屋巴士總站", desc: "搭乘濃飛巴士出發" },
-                { time: "11:00", name: "抵達高山站", desc: "先至飯店放行李" },
-                { time: "11:30", name: "上三之町老街", desc: "午餐：飛驒牛握壽司、特色小吃" },
-                { time: "13:00", name: "中橋", desc: "高山經典紅色橋拍照點" },
-                { time: "14:00", name: "高山陣屋", desc: "全日唯一的郡代官府參觀" },
+                { time: "11:00", name: "高山站", desc: "飯店放行李" },
+                { time: "11:30", name: "上三之町老街", desc: "午餐：飛驒牛握壽司、小吃" },
+                { time: "13:00", name: "中橋", desc: "紅色橋拍照點" },
+                { time: "14:00", name: "高山陣屋", desc: "郡代官府參觀" },
                 { time: "15:30", name: "飛驒之里", desc: "搭猿寶寶巴士參觀合掌屋建築" },
-                { time: "18:00", name: "飛驒牛燒肉", desc: "晚餐：丸明或味藏天國" }
+                { time: "18:00", name: "飛驒牛燒肉", desc: "晚餐預約丸明或味藏天國" }
             ]},
-            "1224": { title: "Day 4：雨天撤離！名古屋室內行", city: "Nagoya", spots: [
-                { time: "08:00", name: "宮川早市", desc: "最後快速巡禮補貨，10點準備離開" },
-                { time: "10:00", name: "高山濃飛巴士站", desc: "搭乘巴士回名古屋(12:45抵達)" },
-                { time: "13:00", name: "名古屋站午餐", desc: "車站地下街解決" },
+            "1224": { title: "Day 4：雨天撤離！名市室內行", city: "Nagoya", spots: [
+                { time: "08:00", name: "宮川早市", desc: "最後快速巡禮，10點準備搭車" },
+                { time: "10:00", name: "高山濃飛巴士站", desc: "搭車回名古屋(預計12:45抵達)" },
                 { time: "14:00", name: "豐田產業技術紀念館", desc: "室內避雨，最後入場16:30" },
                 { time: "17:00", name: "則武之森 AEON", desc: "網美巨型書牆、超市採買" }
             ]},
-            "1225": { title: "Day 5：吉卜力全日", city: "Nagakute", spots: [
-                { time: "09:30", name: "吉卜力公園", desc: "大倉庫、魔女之谷、全日遊覽" }
+            "1225": { title: "Day 5：吉卜力全攻略路線", city: "Nagakute", spots: [
+                { time: "08:30", name: "名古屋站出發", desc: "地鐵東山線至藤之丘，轉 Linimo" },
+                { time: "09:30", name: "愛地球博紀念公園站", desc: "抵達，步行至園區入口" },
+                { time: "09:40", name: "E1 接駁站牌", desc: "搭乘園內巴士前往「動動力森林」" },
+                { time: "10:00", name: "動動力森林", desc: "龍貓的小月小梅之家" },
+                { time: "11:30", name: "魔女之谷 / 魔法之里", desc: "依序參觀，包含霍爾移動城堡" },
+                { time: "14:00", name: "吉卜力大倉庫", desc: "核心精華區，建議預留3小時" },
+                { time: "17:30", name: "返回名古屋", desc: "晚間可去名鐵百貨或名站地下街" }
             ]},
             "1226": { title: "Day 6：最終補貨與歸途", city: "Nagoya", spots: [
                 { time: "09:00", name: "熱田神宮", desc: "悠閒參拜" },
