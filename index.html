@@ -36,7 +36,7 @@
                     <span id="weather-temp" class="text-5xl font-light">--</span>
                     <span class="text-2xl ml-1">°C</span>
                 </div>
-                <p id="weather-desc" class="text-sm mt-1 font-medium italic underline cursor-pointer">點擊看詳細預報</p>
+                <p id="weather-desc" class="text-sm mt-1 font-medium italic underline cursor-pointer">點擊看預報</p>
             </div>
             <div class="text-right z-10">
                 <i id="weather-icon" class="fas fa-snowflake text-6xl opacity-30"></i>
@@ -46,19 +46,6 @@
 
     <div class="flex overflow-x-auto px-6 space-x-3 mb-6 no-scrollbar" id="date-tabs"></div>
     <main id="app-content" class="px-6 space-y-4"></main>
-
-    <div id="add-modal" class="fixed inset-0 bg-black/60 z-[200] hidden flex items-center justify-center p-6 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-sm rounded-[2rem] p-8 space-y-4">
-            <h3 class="text-xl font-bold">新增行程</h3>
-            <input type="text" id="new-time" placeholder="時間 (09:00)">
-            <input type="text" id="new-name" placeholder="名稱">
-            <textarea id="new-desc" placeholder="詳情"></textarea>
-            <div class="flex space-x-3 pt-2">
-                <button onclick="saveNewSpot()" class="flex-1 bg-[#8C7355] text-white py-3 rounded-2xl font-bold">儲存</button>
-                <button onclick="closeModal()" class="flex-1 bg-stone-100 text-gray-500 py-3 rounded-2xl font-bold">取消</button>
-            </div>
-        </div>
-    </div>
 
     <nav class="floating-nav px-8 py-4 flex justify-between items-center text-[#8C7355]">
         <div onclick="window.scrollTo({top:0, behavior:'smooth'})" class="flex flex-col items-center">
@@ -77,45 +64,40 @@
     <script>
         const defaultData = {
             "1221": { title: "Day 1：抵達名古屋", city: "Nagoya", spots: [
-                { time: "18:30", name: "中部國際機場", desc: "抵達、出關，搭乘 μ-SKY 前往名站" },
-                { time: "20:30", name: "名古屋車站", desc: "飯店 Check-in，吃味噌豬排或鰻魚飯" }
+                { time: "18:30", name: "中部國際機場", desc: "抵達出關，搭 μ-SKY 前往名站" },
+                { time: "20:30", name: "名古屋車站", desc: "飯店 Check-in，晚餐：味噌豬排" }
             ]},
             "1222": { title: "Day 2：犬山城與榮區購物", city: "Inuyama", spots: [
-                { time: "08:30", name: "名古屋站", desc: "搭乘名鐵前往「犬山遊園站」" },
-                { time: "09:30", name: "犬山城天守閣", desc: "登頂避人潮" },
-                { time: "11:00", name: "三光稻荷神社", desc: "洗錢祈福" },
+                { time: "08:30", name: "名古屋站", desc: "名鐵前往犬山遊園站" },
+                { time: "09:30", name: "犬山城天守閣", desc: "登頂俯瞰木曾川" },
                 { time: "12:00", name: "犬山城下町", desc: "午餐邊走邊吃" },
-                { time: "15:00", name: "大須觀音", desc: "視體力走馬看花逛商店街" },
-                { time: "17:00", name: "榮區商圈", desc: "百貨逛街、購物行程" },
-                { time: "19:00", name: "Oasis 21", desc: "電視塔點燈夜景" }
+                { time: "15:00", name: "大須商店街", desc: "走馬看花逛特色小店" },
+                { time: "17:00", name: "榮區商圈", desc: "百貨逛街、採買行程" }
             ]},
-            "1223": { title: "Day 3：高山精華巡禮", city: "Takayama", spots: [
-                { time: "07:45", name: "名古屋巴士總站", desc: "搭乘濃飛巴士出發" },
-                { time: "11:00", name: "高山站", desc: "飯店放行李" },
-                { time: "11:30", name: "上三之町老街", desc: "午餐：飛驒牛握壽司、小吃" },
-                { time: "13:00", name: "中橋", desc: "紅色橋拍照點" },
-                { time: "14:00", name: "高山陣屋", desc: "郡代官府參觀" },
-                { time: "15:30", name: "飛驒之里", desc: "搭猿寶寶巴士參觀合掌屋建築" },
+            "1223": { title: "Day 3：高山老街巡禮", city: "Takayama", spots: [
+                { time: "07:45", name: "名古屋巴士總站", desc: "搭乘濃飛巴士" },
+                { time: "11:00", name: "高山站", desc: "飯店寄放行李" },
+                { time: "11:30", name: "上三之町老街", desc: "午餐：飛驒牛握壽司、小吃巡禮" },
+                { time: "13:30", name: "中橋 / 陣屋前", desc: "紅色橋拍照，逛逛周邊古建築" },
+                { time: "14:30", name: "高山陣屋", desc: "參觀歷史官署" },
+                { time: "16:00", name: "飛驒高山社區巴士", desc: "可自選：飛驒之里(看屋)或博物館" },
                 { time: "18:00", name: "飛驒牛燒肉", desc: "晚餐預約丸明或味藏天國" }
             ]},
-            "1224": { title: "Day 4：雨天撤離！名市室內行", city: "Nagoya", spots: [
-                { time: "08:00", name: "宮川早市", desc: "最後快速巡禮，10點準備搭車" },
-                { time: "10:00", name: "高山濃飛巴士站", desc: "搭車回名古屋(預計12:45抵達)" },
-                { time: "14:00", name: "豐田產業技術紀念館", desc: "室內避雨，最後入場16:30" },
-                { time: "17:00", name: "則武之森 AEON", desc: "網美巨型書牆、超市採買" }
+            "1224": { title: "Day 4：合掌村與最終名古屋", city: "Ono", spots: [
+                { time: "07:50", name: "高山濃飛巴士站", desc: "前往白川鄉合掌村" },
+                { time: "09:00", name: "城山展望台", desc: "必拍！合掌村全景" },
+                { time: "10:30", name: "合掌村漫步", desc: "參觀和田家、明善寺" },
+                { time: "14:30", name: "白川鄉離開", desc: "搭車返回名古屋(預計17:16抵)" },
+                { time: "18:30", name: "豐田產業技術紀念館", desc: "若是提早回名站可逛(最後入場16:30)，或改逛百貨" }
             ]},
-            "1225": { title: "Day 5：吉卜力全攻略路線", city: "Nagakute", spots: [
-                { time: "08:30", name: "名古屋站出發", desc: "地鐵東山線至藤之丘，轉 Linimo" },
-                { time: "09:30", name: "愛地球博紀念公園站", desc: "抵達，步行至園區入口" },
-                { time: "09:40", name: "E1 接駁站牌", desc: "搭乘園內巴士前往「動動力森林」" },
-                { time: "10:00", name: "動動力森林", desc: "龍貓的小月小梅之家" },
-                { time: "11:30", name: "魔女之谷 / 魔法之里", desc: "依序參觀，包含霍爾移動城堡" },
-                { time: "14:00", name: "吉卜力大倉庫", desc: "核心精華區，建議預留3小時" },
-                { time: "17:30", name: "返回名古屋", desc: "晚間可去名鐵百貨或名站地下街" }
+            "1225": { title: "Day 5：吉卜力全攻略", city: "Nagakute", spots: [
+                { time: "08:30", name: "名古屋站出發", desc: "東山線至藤之丘，轉 Linimo" },
+                { time: "09:40", name: "E1 接駁站牌", desc: "搭巴士前往「動動力森林」" },
+                { time: "14:00", name: "吉卜力大倉庫", desc: "精華區域，預留3小時以上" }
             ]},
-            "1226": { title: "Day 6：最終補貨與歸途", city: "Nagoya", spots: [
+            "1226": { title: "Day 6：最終採買歸途", city: "Nagoya", spots: [
                 { time: "09:00", name: "熱田神宮", desc: "悠閒參拜" },
-                { time: "11:00", name: "大須商店街", desc: "最後採買行程" },
+                { time: "11:00", name: "大須商店街", desc: "最後補貨與藥妝採買" },
                 { time: "15:30", name: "名古屋站", desc: "搭 μ-SKY 前往中部機場" }
             ]}
         };
@@ -131,8 +113,8 @@
                 const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
                 const data = await res.json();
                 document.getElementById('weather-temp').innerText = Math.round(data.current_weather.temperature);
-                document.getElementById('weather-city').innerText = city;
-                document.getElementById('weather-desc').onclick = () => window.open('https://www.accuweather.com/zh/jp/nagoya-shi/224967/weather-forecast/224967');
+                document.getElementById('weather-city').innerText = city === "Ono" ? "Shirakawa-go" : city;
+                document.getElementById('weather-desc').onclick = () => window.open('https://www.accuweather.com/zh/jp/shirakawa/223707/weather-forecast/223707');
             } catch (e) { document.getElementById('weather-temp').innerText = "--"; }
         }
 
@@ -155,38 +137,18 @@
                 const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name)}`;
                 return `
                 <div class="spot-card p-5" onclick="${isEditMode ? '' : `window.open('${mapLink}')`}">
-                    ${isEditMode ? `<button onclick="event.stopPropagation(); deleteSpot(${index})" class="text-red-500 absolute top-4 right-4"><i class="fas fa-times-circle"></i></button>` : ''}
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
-                            ${isEditMode ? `<input type="text" onchange="updateSpot(${index}, 'name', this.value)" value="${spot.name}" class="font-bold mb-1 w-full" onclick="event.stopPropagation()">` : `<h3 class="text-base font-bold text-gray-800">${spot.name}</h3>`}
-                            ${isEditMode ? `<textarea onchange="updateSpot(${index}, 'desc', this.value)" class="mt-1 w-full" onclick="event.stopPropagation()">${spot.desc}</textarea>` : `<p class="text-[12px] text-gray-500 mt-1 leading-snug">${spot.desc}</p>`}
+                            <h3 class="text-base font-bold text-gray-800">${spot.name}</h3>
+                            <p class="text-[12px] text-gray-500 mt-1 leading-snug">${spot.desc}</p>
                         </div>
                         <div class="text-right ml-4">
-                            ${isEditMode ? `<input type="text" onchange="updateSpot(${index}, 'time', this.value)" value="${spot.time}" class="text-sm font-black text-right w-16" onclick="event.stopPropagation()">` : `<span class="text-sm font-black text-[#8C7355] font-mono">${spot.time}</span>`}
+                            <span class="text-sm font-black text-[#8C7355] font-mono">${spot.time}</span>
                         </div>
                     </div>
                 </div>`;
             }).join('');
         }
-
-        function toggleEditMode() {
-            isEditMode = !isEditMode;
-            document.getElementById('edit-toggle').innerText = `EDIT: ${isEditMode ? 'ON' : 'OFF'}`;
-            document.getElementById('edit-toggle').classList.toggle('bg-[#8C7355]');
-            document.getElementById('edit-toggle').classList.toggle('text-white');
-            renderContent();
-        }
-
-        function updateSpot(index, field, value) { myTrip[currentDay].spots[index][field] = value; saveData(); }
-        function deleteSpot(index) { if(confirm('刪除？')) { myTrip[currentDay].spots.splice(index, 1); saveData(); renderContent(); } }
-        function showAddModal() { document.getElementById('add-modal').classList.remove('hidden'); }
-        function closeModal() { document.getElementById('add-modal').classList.add('hidden'); }
-        function saveNewSpot() {
-            const newSpot = { time: document.getElementById('new-time').value, name: document.getElementById('new-name').value, desc: document.getElementById('new-desc').value };
-            myTrip[currentDay].spots.push(newSpot); myTrip[currentDay].spots.sort((a,b) => a.time.localeCompare(b.time)); saveData(); renderContent(); closeModal();
-        }
-        function saveData() { localStorage.setItem('nagoya_trip', JSON.stringify(myTrip)); }
-        function exportData() { prompt("同步代碼:", JSON.stringify(myTrip)); }
 
         renderTabs(); switchDay("1221");
     </script>
